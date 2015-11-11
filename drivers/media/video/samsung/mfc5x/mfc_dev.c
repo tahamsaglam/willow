@@ -119,7 +119,7 @@ static int mfc_open(struct inode *inode, struct file *file)
 
 	mutex_lock(&mfcdev->lock);
 
-#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_WILLOW)
+#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_MEHMET)
 	if (atomic_read(&mfcdev->inst_cnt) == 0) {
 		size_t size = 0x02800000;
 		mfcdev->cma_vaddr = dma_alloc_coherent(mfcdev->device, size,
@@ -390,7 +390,7 @@ static int mfc_release(struct inode *inode, struct file *file)
 	ret = 0;
 
 err_pwr_disable:
-#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_WILLOW)
+#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_MEHMET)
 	if (atomic_read(&mfcdev->inst_cnt) == 0) {
 		size_t size = 0x02800000;
 		dma_free_coherent(mfcdev->device, size, mfcdev->cma_vaddr,

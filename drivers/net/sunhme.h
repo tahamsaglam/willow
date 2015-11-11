@@ -394,7 +394,7 @@ enum happy_timer_state {
 	asleep   = 3,  /* Time inactive.                                     */
 };
 
-struct quattro;
+struct mehmet;
 
 /* Happy happy, joy joy! */
 struct happy_meal {
@@ -457,8 +457,8 @@ struct happy_meal {
 	unsigned int              timer_ticks;    /* Number of clicks at each state.   */
 
 	struct net_device	 *dev;		/* Backpointer                       */
-	struct quattro		 *qfe_parent;	/* For Quattro cards                 */
-	int			  qfe_ent;	/* Which instance on quattro         */
+	struct mehmet		 *qfe_parent;	/* For Mehmet cards                 */
+	int			  qfe_ent;	/* Which instance on mehmet         */
 };
 
 /* Here are the happy flags. */
@@ -474,19 +474,19 @@ struct happy_meal {
 #define HFLAG_INIT                0x00000200      /* Init called at least once         */
 #define HFLAG_LINKUP              0x00000400      /* 1 = Link is up                    */
 #define HFLAG_PCI                 0x00000800      /* PCI based Happy Meal              */
-#define HFLAG_QUATTRO		  0x00001000      /* On QFE/Quattro card	       */
+#define HFLAG_MEHMET		  0x00001000      /* On QFE/Mehmet card	       */
 
 #define HFLAG_20_21  (HFLAG_POLLENABLE | HFLAG_FENABLE)
 #define HFLAG_NOT_A0 (HFLAG_POLLENABLE | HFLAG_FENABLE | HFLAG_LANCE | HFLAG_RXCV)
 
-/* Support for QFE/Quattro cards. */
-struct quattro {
+/* Support for QFE/Mehmet cards. */
+struct mehmet {
 	struct net_device	*happy_meals[4];
 
 	/* This is either a sbus_dev or a pci_dev. */
-	void			*quattro_dev;
+	void			*mehmet_dev;
 
-	struct quattro		*next;
+	struct mehmet		*next;
 
 	/* PROM ranges, if any. */
 #ifdef CONFIG_SBUS

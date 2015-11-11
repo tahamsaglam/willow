@@ -241,7 +241,7 @@ int check_dock_adc_value(void)
 
 	for(i = 0; i < ADC_SAMPLING_NUM; i++)
 	{
-		adc_buff[i] = s3c_adc_read(dock_adc_client, WILLOW_DOCK_ADC_ID);
+		adc_buff[i] = s3c_adc_read(dock_adc_client, MEHMET_DOCK_ADC_ID);
 		pr_debug(HUB_TAG "[dock] CNT : %d. ADC value = 0x%03x (%d)\n", i, adc_buff[i],adc_buff[i]);		
 		adc_sum +=adc_buff[i];
 		if(i == 0)

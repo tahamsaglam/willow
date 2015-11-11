@@ -496,8 +496,8 @@ static struct platform_driver sensor_driver = {
 
 static int __init sensor_init(void)
 {
-    #include <mach/willow_version.h>
-    if(g_willow_hw_version!=WILLOW_HW_DVT){
+    #include <mach/mehmet_version.h>
+    if(g_mehmet_hw_version!=MEHMET_HW_DVT){
         YLOGE("sensor_init : Not use this! yamaha sensor only used DVT device!\n");
         return -1;
     }

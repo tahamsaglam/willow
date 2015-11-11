@@ -335,8 +335,8 @@ static void exynos4_cpu_prepare(void)
 {
 	if (exynos4_sleep_gpio_table_set)
 		exynos4_sleep_gpio_table_set();
-#ifdef CONFIG_MACH_WILLOW
-	willow_config_gpio_table();
+#ifdef CONFIG_MACH_MEHMET
+	mehmet_config_gpio_table();
 #endif
 	/* Set value of power down register for sleep mode */
 

@@ -30,10 +30,10 @@
 #ifdef CONFIG_JACK_MGR
 #include <linux/sec_jack.h>
 
-static int willow_jack_key_registered = 0;
+static int mehmet_jack_key_registered = 0;
 
-extern int willow_convert_jack_remote_key(int state);
-extern int willow_jack_get_type(void);
+extern int mehmet_convert_jack_remote_key(int state);
+extern int mehmet_jack_get_type(void);
 
 struct jack_button_data {
 	struct jack_keys_button *button;
@@ -338,9 +338,9 @@ static void jack_keys_report_event(struct jack_button_data *bdata)
 
   printk("### %s : type=%d, key=%d, state=%d ###\n",__func__,type,button->code,state);
   
-  if( ( type == EV_KEY ) && ( button->code == KEY_MEDIA ) && ( willow_jack_get_type() == SEC_HEADSET_4POLE ) )
+  if( ( type == EV_KEY ) && ( button->code == KEY_MEDIA ) && ( mehmet_jack_get_type() == SEC_HEADSET_4POLE ) )
   {
-    key_code = willow_convert_jack_remote_key( state );
+    key_code = mehmet_convert_jack_remote_key( state );
 
     printk("### %s : converted_key=%d ###\n",__func__,key_code);
 
@@ -646,20 +646,20 @@ static struct platform_driver jack_keys_device_driver = {
 	}
 };
 
-void willow_enable_media_key(void)
+void mehmet_enable_media_key(void)
 {
-  if(!willow_jack_key_registered)
+  if(!mehmet_jack_key_registered)
   {
     platform_driver_register(&jack_keys_device_driver);
-    willow_jack_key_registered = 1;
+    mehmet_jack_key_registered = 1;
   }
 }
-void willow_disable_media_key(void)
+void mehmet_disable_media_key(void)
 {
-  if(willow_jack_key_registered)
+  if(mehmet_jack_key_registered)
   {
     platform_driver_unregister(&jack_keys_device_driver);
-    willow_jack_key_registered = 0;
+    mehmet_jack_key_registered = 0;
   }
 }
 

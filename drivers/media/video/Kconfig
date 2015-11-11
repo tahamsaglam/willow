@@ -986,7 +986,7 @@ config VIDEO_MT9M113
 
 config VIDEO_AS0260
 	tristate "AS0260 supporting camera driver"
-	depends on VIDEO_V4L2 && (VIDEO_FIMC_MIPI || VIDEO_S5P_MIPI_CSIS) && VIDEO_EXYNOS_FIMC_IS
+	depends on VIDEO_V4L2 && (VIDEO_FIMC_MIPI || VIDEO_S5P_MIPI_CSIS)
 	---help---
 	  This driver supports AS0260 sensor.
 

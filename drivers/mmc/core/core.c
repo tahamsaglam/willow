@@ -1409,6 +1409,9 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
 	spin_unlock_irqrestore(&host->lock, flags);
 #endif
 
+	printk(KERN_INFO "%s(%s): wait for 500ms\n", __func__, mmc_hostname(host));
+	delay = msecs_to_jiffies(500); // wait for 500ms
+
 	wake_lock(&host->detect_wake_lock);
 	mmc_schedule_delayed_work(&host->detect, delay);
 }

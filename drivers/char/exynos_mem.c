@@ -46,16 +46,16 @@ int exynos_mem_open(struct inode *inode, struct file *filp)
 
 	filp->private_data = prv_data;
 
-	printk(KERN_DEBUG "[%s:%d] private_data(0x%08x)\n",
-		__func__, __LINE__, (u32)prv_data);
+	/* printk(KERN_DEBUG "[%s:%d] private_data(0x%08x)\n", */
+	/* 	__func__, __LINE__, (u32)prv_data); */
 
 	return 0;
 }
 
 int exynos_mem_release(struct inode *inode, struct file *filp)
 {
-	printk(KERN_DEBUG "[%s:%d] private_data(0x%08x)\n",
-		__func__, __LINE__, (u32)filp->private_data);
+	/* printk(KERN_DEBUG "[%s:%d] private_data(0x%08x)\n", */
+	/* 	__func__, __LINE__, (u32)filp->private_data); */
 
 	kfree(filp->private_data);
 
@@ -201,12 +201,12 @@ long exynos_mem_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 static void exynos_mem_mmap_open(struct vm_area_struct *vma)
 {
-	printk(KERN_DEBUG "[%s] addr(0x%08x)\n", __func__, (u32)vma->vm_start);
+	/* printk(KERN_DEBUG "[%s] addr(0x%08x)\n", __func__, (u32)vma->vm_start); */
 }
 
 static void exynos_mem_mmap_close(struct vm_area_struct *vma)
 {
-	printk(KERN_DEBUG "[%s] addr(0x%08x)\n", __func__, (u32)vma->vm_start);
+	/* printk(KERN_DEBUG "[%s] addr(0x%08x)\n", __func__, (u32)vma->vm_start); */
 }
 
 static struct vm_operations_struct exynos_mem_ops = {

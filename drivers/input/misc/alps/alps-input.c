@@ -301,8 +301,8 @@ static int __init alps_init(void)
     struct input_dev *idev;
     int ret;
 
-    #include <mach/willow_version.h>
-    if(g_willow_hw_version >= WILLOW_HW_MVT){
+    #include <mach/mehmet_version.h>
+    if(g_mehmet_hw_version >= MEHMET_HW_MVT){
         printk("alps_init: board revision check ok! (upper MVT) \n");
     }else{
         printk("alps_init: Not use! alps input device not used DVT device!\n");

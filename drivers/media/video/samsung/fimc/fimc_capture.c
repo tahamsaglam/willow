@@ -30,7 +30,7 @@
 
 #include "fimc.h"
 
-int willow_capture_status=0;
+int mehmet_capture_status=0;
 extern int mipi_start;
 
 void fimc_pixelformat_deb(u32 pformat)
@@ -746,6 +746,7 @@ int fimc_g_input(struct file *file, void *fh, unsigned int *i)
 	mutex_unlock(&ctrl->v4l2_lock);
 
 	fimc_dbg("%s: index %d\n", __func__, *i);
+    printk("%s: index %d\n", __func__, *i);
 
 	return 0;
 }
@@ -1040,10 +1041,12 @@ int fimc_s_input(struct file *file, void *fh, unsigned int i)
 	if (!fimc->camera_isvalid[i])
 		return -EINVAL;
 
+	fimc_dbg("%s: fimc_cam_use %x, fimc->camera[i]->sd %x", __func__, fimc_cam_use, fimc->camera[i]->sd);
 	if (fimc->camera[i]->sd && fimc_cam_use) {
 		fimc_err("%s: Camera already in use.\n", __func__);
 		return -EBUSY;
 	}
+
 	mutex_lock(&ctrl->v4l2_lock);
 
 	/* If ctrl->cam is not NULL, there is one subdev already registered.
@@ -1054,6 +1057,7 @@ int fimc_s_input(struct file *file, void *fh, unsigned int i)
 			fimc_release_subdev(ctrl);
 		else if (ctrl->is.sd)
 			fimc_is_release_subdev(ctrl);
+
 		ctrl->cam = fimc->camera[i];
 
 		if ((ctrl->cam->id != CAMERA_WB) && (ctrl->cam->id !=
@@ -1132,6 +1136,51 @@ int fimc_s_input(struct file *file, void *fh, unsigned int i)
 
 	return 0;
 }
+
+#if 1 // just print log 
+struct log_descr {
+	enum fimc_status status;
+	const char *descr;
+};
+
+static const struct log_descr enum_values[] = {
+    { FIMC_READY_OFF        , "FIMC_READY_OFF"     },
+    { FIMC_STREAMOFF        , "FIMC_STREAMOFF"     },
+    { FIMC_READY_ON         , "FIMC_READY_ON"      },
+    { FIMC_STREAMON         , "FIMC_STREAMON"      },
+    { FIMC_STREAMON_IDLE    , "FIMC_STREAMON_IDLE" },
+    { FIMC_OFF_SLEEP        , "FIMC_OFF_SLEEP"     },
+    { FIMC_ON_SLEEP         , "FIMC_ON_SLEEP"      },
+    { FIMC_ON_IDLE_SLEEP    , "FIMC_ON_IDLE_SLEEP" },
+    { FIMC_READY_RESUME     , "FIMC_READY_RESUME"  },
+    { FIMC_BUFFER_STOP      , "FIMC_BUFFER_STOP"   },
+    { FIMC_BUFFER_START     , "FIMC_BUFFER_START"  }, 
+    { -1                    , "FIMC_STATUS_ERROR"  }, 
+};
+
+int fimc_log_status(struct file *file, void* fh)
+{
+    int i = 0;
+
+	//struct fimc_global *fimc = get_fimc_dev();
+	struct fimc_control *ctrl = ((struct fimc_prv_data *)fh)->ctrl;
+	//struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->dev);
+
+    enum fimc_status cur_status = ctrl->status;
+    int status_descr_index = sizeof(enum_values)/sizeof(struct log_descr*) - 1;
+
+    for (i = 0; enum_values[i].status != -1; i++) {
+        if (cur_status == enum_values[i].status) {
+            status_descr_index = i;
+            break;
+        }
+    }
+
+    printk("fimc current status is %s\n", enum_values[status_descr_index].descr);
+
+    return 0;
+}
+#endif
 
 int fimc_enum_fmt_vid_capture(struct file *file, void *fh,
 					struct v4l2_fmtdesc *f)
@@ -1342,6 +1391,7 @@ int fimc_s_fmt_vid_capture(struct file *file, void *fh, struct v4l2_format *f)
 
 		/* assign to ctrl */
 		ctrl->cap = cap;
+        //fimc_dbg("%s: ctrl->cap is allocated, %x\n", cap);
 #if (defined(CONFIG_EXYNOS_DEV_PD) && defined(CONFIG_PM_RUNTIME))
 		if (ctrl->power_status == FIMC_POWER_OFF)
 			pm_runtime_get_sync(&pdev->dev);
@@ -1972,10 +2022,10 @@ int fimc_s_ctrl_capture(void *fh, struct v4l2_control *c)
 #endif
 
 	case V4L2_CID_CAMERA_CAPTURE_STATUS:
-		willow_capture_status=c->value;
+		mehmet_capture_status=c->value;
  		printk("[FIMC] V4L2_CID_CAMERA_CAPTURE_STATUS =%d \n", c->value);
 #if defined(CONFIG_VIDEO_MT9M113)
-		if (willow_capture_status == 0)
+		if (mehmet_capture_status == 0)
 			ret = v4l2_subdev_call(ctrl->cam->sd, video, s_stream, 1);
 #endif
 		ret = 0;
@@ -2064,6 +2114,7 @@ int fimc_cropcap_capture(void *fh, struct v4l2_cropcap *a)
 
 		/* assign to ctrl */
 		ctrl->cap = cap;
+        //fimc_dbg("%s: ctrl->cap is allocated, %x\n", cap);
 	}
 
 	/* crop limitations */
@@ -2247,9 +2298,9 @@ int fimc_streamon_capture(void *fh)
 	/*
 	s3c_csis_stop(CSI_CH_1);
 
-	if(willow_capture_status==0)
+	if(mehmet_capture_status==0)
 		ret=v4l2_subdev_call(cam->sd, video, s_stream, 1);  //preview
-	else if(willow_capture_status==1)
+	else if(mehmet_capture_status==1)
 				ret=v4l2_subdev_call(cam->sd, video, s_stream, 3);  //Snapshot
 
 	fimc_hwset_reset(ctrl);
@@ -2312,7 +2363,7 @@ int fimc_streamon_capture(void *fh)
 			}
 			if (cap->fmt.priv != V4L2_PIX_FMT_MODE_CAPTURE) {
 #if defined(CONFIG_VIDEO_MT9M113)
-				if (willow_capture_status == 0)
+				if (mehmet_capture_status == 0)
 				ret = v4l2_subdev_call(cam->sd, video, s_stream, 1);
 				else
 				ret = v4l2_subdev_call(cam->sd, video, s_stream, 3);
@@ -2504,7 +2555,7 @@ int fimc_streamoff_capture(void *fh)
 
 		if (ctrl->cam->type == CAM_TYPE_MIPI) {
 #if defined(CONFIG_VIDEO_AS0260)
-			if(willow_capture_status==0){
+			if(mehmet_capture_status==0){
 				if (ctrl->cam->id == CAMERA_CSI_C)
 					s3c_csis_stop(CSI_CH_0);
 				else

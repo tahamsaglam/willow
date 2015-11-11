@@ -1320,13 +1320,23 @@ static int fimc_release(struct file *filp)
 
 	atomic_dec(&ctrl->in_use);
 
-	if (ctrl->cap && (ctrl->status != FIMC_STREAMOFF))
+    fimc_dbg("fimc_release cap %x cam %x status %d \n", ctrl->cap, ctrl->cam,  ctrl->status);
+
+	if (ctrl->cap && (ctrl->status != FIMC_STREAMOFF)) {
+        //fimc_dbg("fimc_release streamoff_capture is called\n");
 		fimc_streamoff_capture((void *)ctrl);
+    }
 
 	/* FIXME: turning off actual working camera */
-	if (ctrl->cap && ctrl->cam) {
+#if 1 // debug aidijun
+    if (ctrl->cam)
+#else
+	if (ctrl->cap && ctrl->cam)
+#endif
+    {
 		/* Unload the subdev (camera sensor) module,
 		 * reset related status flags */
+        //fimc_dbg("fimc_release fimc_release_subdev and is_release_subdev are called\n");
 		fimc_release_subdev(ctrl);
 		fimc_is_release_subdev(ctrl);
 #if (defined(CONFIG_EXYNOS_DEV_PD) && defined(CONFIG_PM_RUNTIME))
@@ -1334,8 +1344,10 @@ static int fimc_release(struct file *filp)
 			pm_runtime_put_sync(ctrl->dev);
 #endif
 	} else if (ctrl->is.sd) {
+        //fimc_dbg("fimc_release fimc_is_release_subdev is called\n");
 		fimc_is_release_subdev(ctrl);
 	}
+
 	if (atomic_read(&ctrl->in_use) == 0) {
 #if (!defined(CONFIG_EXYNOS_DEV_PD) || !defined(CONFIG_PM_RUNTIME))
 		if (pdata->clk_off) {
@@ -1345,6 +1357,8 @@ static int fimc_release(struct file *filp)
 		}
 #endif
 	}
+    //fimc_dbg("fimc_release ctrl->power_status %d\n", ctrl->power_status);
+
 	if (ctrl->out) {
 		if (ctx->status != FIMC_STREAMOFF) {
 			ret = fimc_outdev_stop_streaming(ctrl, ctx);
@@ -1430,6 +1444,7 @@ static int fimc_release(struct file *filp)
 		}
 		kfree(ctrl->cap);
 		ctrl->cap = NULL;
+        //fimc_dbg("%s: cap released and set as null\n");
 	}
 
 	/*
@@ -1844,6 +1859,13 @@ err_alloc:
 
 static int fimc_remove(struct platform_device *pdev)
 {
+#if 0
+	struct fimc_control *ctrl;
+	ctrl = get_fimc_ctrl(pdev->id); 
+
+    fimc_dbg("fimc_remove unregister pdev %x and remove file\n", pdev);
+#endif
+
 	fimc_unregister_controller(pdev);
 
 	device_remove_file(&(pdev->dev), &dev_attr_log_level);

@@ -723,6 +723,7 @@ extern void fimc_hwset_disable_frame_end_irq(struct fimc_control *ctrl);
 extern void fimc_reset_status_reg(struct fimc_control *ctrl);
 /* IPC related file */
 extern void ipc_start(void);
+extern int fimc_log_status(struct file *file, void* fh);
 
 /*
  * DRIVER HELPERS

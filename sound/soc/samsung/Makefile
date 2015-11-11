@@ -41,7 +41,7 @@ snd-soc-goni-wm8994-objs := goni_wm8994.o
 snd-soc-smdk-spdif-objs := smdk_spdif.o
 snd-soc-smdk-wm8580pcm-objs := smdk_wm8580pcm.o
 snd-soc-speyside-objs := speyside.o
-snd-soc-willow-dai-objs := willow_dai.o
+snd-soc-mehmet-dai-objs := mehmet_dai.o
 
 obj-$(CONFIG_SND_SOC_SAMSUNG_JIVE_WM8750) += snd-soc-jive-wm8750.o
 obj-$(CONFIG_SND_SOC_SAMSUNG_NEO1973_WM8753) += snd-soc-neo1973-wm8753.o
@@ -62,7 +62,7 @@ obj-$(CONFIG_SND_SOC_SAMSUNG_SMDK_SPDIF) += snd-soc-smdk-spdif.o
 obj-$(CONFIG_SND_SOC_GONI_AQUILA_WM8994) += snd-soc-goni-wm8994.o
 obj-$(CONFIG_SND_SOC_SMDK_WM8580_PCM) += snd-soc-smdk-wm8580pcm.o
 obj-$(CONFIG_SND_SOC_SPEYSIDE) += snd-soc-speyside.o
-obj-$(CONFIG_SND_SOC_WILLOW_DAI) += snd-soc-willow-dai.o
+obj-$(CONFIG_SND_SOC_MEHMET_DAI) += snd-soc-mehmet-dai.o
 
 obj-$(CONFIG_SND_SAMSUNG_RP)   += srp_ulp/
 obj-$(CONFIG_SND_SAMSUNG_ALP)   += srp_alp/

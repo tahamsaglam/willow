@@ -70,8 +70,14 @@ ifeq ($(CONFIG_TOUCHSCREEN_ATMEL_MXT1664S),y)
 
 ifeq ($(CONFIG_MXT1664S_V13),y)
 obj-y += 1664s_driver_v13.o
+CFLAGS_1664s_driver_v13.o += -DFEATURE_TOUCH_V13
+else
+ifeq ($(CONFIG_MXT1664S_V20),y)
+obj-y += 1664s_driver_v13.o
+CFLAGS_1664s_driver_v13.o += -DFEATURE_TOUCH_V20
 else
 obj-y += 1664s_driver.o
+endif
 endif
 
 endif

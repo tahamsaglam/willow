@@ -81,11 +81,11 @@ module_param_array(macaddr, int, NULL, 0);
 MODULE_PARM_DESC(macaddr, "Happy Meal MAC address to set");
 
 #ifdef CONFIG_SBUS
-static struct quattro *qfe_sbus_list;
+static struct mehmet *qfe_sbus_list;
 #endif
 
 #ifdef CONFIG_PCI
-static struct quattro *qfe_pci_list;
+static struct mehmet *qfe_pci_list;
 #endif
 
 #undef HMEDEBUG
@@ -2128,9 +2128,9 @@ out:
 }
 
 #ifdef CONFIG_SBUS
-static irqreturn_t quattro_sbus_interrupt(int irq, void *cookie)
+static irqreturn_t mehmet_sbus_interrupt(int irq, void *cookie)
 {
-	struct quattro *qp = (struct quattro *) cookie;
+	struct mehmet *qp = (struct mehmet *) cookie;
 	int i;
 
 	for (i = 0; i < 4; i++) {
@@ -2138,7 +2138,7 @@ static irqreturn_t quattro_sbus_interrupt(int irq, void *cookie)
 		struct happy_meal *hp  = netdev_priv(dev);
 		u32 happy_status       = hme_read32(hp, hp->gregs + GREG_STAT);
 
-		HMD(("quattro_interrupt: status=%08x ", happy_status));
+		HMD(("mehmet_interrupt: status=%08x ", happy_status));
 
 		if (!(happy_status & (GREG_STAT_ERRORS |
 				      GREG_STAT_MIFIRQ |
@@ -2185,10 +2185,10 @@ static int happy_meal_open(struct net_device *dev)
 
 	HMD(("happy_meal_open: "));
 
-	/* On SBUS Quattro QFE cards, all hme interrupts are concentrated
+	/* On SBUS Mehmet QFE cards, all hme interrupts are concentrated
 	 * into a single source which we register handling at probe time.
 	 */
-	if ((hp->happy_flags & (HFLAG_QUATTRO|HFLAG_PCI)) != HFLAG_QUATTRO) {
+	if ((hp->happy_flags & (HFLAG_MEHMET|HFLAG_PCI)) != HFLAG_MEHMET) {
 		if (request_irq(dev->irq, happy_meal_interrupt,
 				IRQF_SHARED, dev->name, (void *)dev)) {
 			HMD(("EAGAIN\n"));
@@ -2205,7 +2205,7 @@ static int happy_meal_open(struct net_device *dev)
 	res = happy_meal_init(hp);
 	spin_unlock_irq(&hp->happy_lock);
 
-	if (res && ((hp->happy_flags & (HFLAG_QUATTRO|HFLAG_PCI)) != HFLAG_QUATTRO))
+	if (res && ((hp->happy_flags & (HFLAG_MEHMET|HFLAG_PCI)) != HFLAG_MEHMET))
 		free_irq(dev->irq, dev);
 	return res;
 }
@@ -2223,11 +2223,11 @@ static int happy_meal_close(struct net_device *dev)
 
 	spin_unlock_irq(&hp->happy_lock);
 
-	/* On Quattro QFE cards, all hme interrupts are concentrated
+	/* On Mehmet QFE cards, all hme interrupts are concentrated
 	 * into a single source which we register handling at probe
 	 * time and never unregister.
 	 */
-	if ((hp->happy_flags & (HFLAG_QUATTRO|HFLAG_PCI)) != HFLAG_QUATTRO)
+	if ((hp->happy_flags & (HFLAG_MEHMET|HFLAG_PCI)) != HFLAG_MEHMET)
 		free_irq(dev->irq, dev);
 
 	return 0;
@@ -2509,30 +2509,30 @@ static const struct ethtool_ops hme_ethtool_ops = {
 static int hme_version_printed;
 
 #ifdef CONFIG_SBUS
-/* Given a happy meal sbus device, find it's quattro parent.
+/* Given a happy meal sbus device, find it's mehmet parent.
  * If none exist, allocate and return a new one.
  *
  * Return NULL on failure.
  */
-static struct quattro * __devinit quattro_sbus_find(struct platform_device *child)
+static struct mehmet * __devinit mehmet_sbus_find(struct platform_device *child)
 {
 	struct device *parent = child->dev.parent;
 	struct platform_device *op;
-	struct quattro *qp;
+	struct mehmet *qp;
 
 	op = to_platform_device(parent);
 	qp = dev_get_drvdata(&op->dev);
 	if (qp)
 		return qp;
 
-	qp = kmalloc(sizeof(struct quattro), GFP_KERNEL);
+	qp = kmalloc(sizeof(struct mehmet), GFP_KERNEL);
 	if (qp != NULL) {
 		int i;
 
 		for (i = 0; i < 4; i++)
 			qp->happy_meals[i] = NULL;
 
-		qp->quattro_dev = child;
+		qp->mehmet_dev = child;
 		qp->next = qfe_sbus_list;
 		qfe_sbus_list = qp;
 
@@ -2541,16 +2541,16 @@ static struct quattro * __devinit quattro_sbus_find(struct platform_device *chil
 	return qp;
 }
 
-/* After all quattro cards have been probed, we call these functions
+/* After all mehmet cards have been probed, we call these functions
  * to register the IRQ handlers for the cards that have been
  * successfully probed and skip the cards that failed to initialize
  */
-static int __init quattro_sbus_register_irqs(void)
+static int __init mehmet_sbus_register_irqs(void)
 {
-	struct quattro *qp;
+	struct mehmet *qp;
 
 	for (qp = qfe_sbus_list; qp != NULL; qp = qp->next) {
-		struct platform_device *op = qp->quattro_dev;
+		struct platform_device *op = qp->mehmet_dev;
 		int err, qfe_slot, skip = 0;
 
 		for (qfe_slot = 0; qfe_slot < 4; qfe_slot++) {
@@ -2561,11 +2561,11 @@ static int __init quattro_sbus_register_irqs(void)
 			continue;
 
 		err = request_irq(op->archdata.irqs[0],
-				  quattro_sbus_interrupt,
-				  IRQF_SHARED, "Quattro",
+				  mehmet_sbus_interrupt,
+				  IRQF_SHARED, "Mehmet",
 				  qp);
 		if (err != 0) {
-			printk(KERN_ERR "Quattro HME: IRQ registration "
+			printk(KERN_ERR "Mehmet HME: IRQ registration "
 			       "error %d.\n", err);
 			return err;
 		}
@@ -2574,12 +2574,12 @@ static int __init quattro_sbus_register_irqs(void)
 	return 0;
 }
 
-static void quattro_sbus_free_irqs(void)
+static void mehmet_sbus_free_irqs(void)
 {
-	struct quattro *qp;
+	struct mehmet *qp;
 
 	for (qp = qfe_sbus_list; qp != NULL; qp = qp->next) {
-		struct platform_device *op = qp->quattro_dev;
+		struct platform_device *op = qp->mehmet_dev;
 		int qfe_slot, skip = 0;
 
 		for (qfe_slot = 0; qfe_slot < 4; qfe_slot++) {
@@ -2595,26 +2595,26 @@ static void quattro_sbus_free_irqs(void)
 #endif /* CONFIG_SBUS */
 
 #ifdef CONFIG_PCI
-static struct quattro * __devinit quattro_pci_find(struct pci_dev *pdev)
+static struct mehmet * __devinit mehmet_pci_find(struct pci_dev *pdev)
 {
 	struct pci_dev *bdev = pdev->bus->self;
-	struct quattro *qp;
+	struct mehmet *qp;
 
 	if (!bdev) return NULL;
 	for (qp = qfe_pci_list; qp != NULL; qp = qp->next) {
-		struct pci_dev *qpdev = qp->quattro_dev;
+		struct pci_dev *qpdev = qp->mehmet_dev;
 
 		if (qpdev == bdev)
 			return qp;
 	}
-	qp = kmalloc(sizeof(struct quattro), GFP_KERNEL);
+	qp = kmalloc(sizeof(struct mehmet), GFP_KERNEL);
 	if (qp != NULL) {
 		int i;
 
 		for (i = 0; i < 4; i++)
 			qp->happy_meals[i] = NULL;
 
-		qp->quattro_dev = bdev;
+		qp->mehmet_dev = bdev;
 		qp->next = qfe_pci_list;
 		qfe_pci_list = qp;
 
@@ -2641,7 +2641,7 @@ static const struct net_device_ops hme_netdev_ops = {
 static int __devinit happy_meal_sbus_probe_one(struct platform_device *op, int is_qfe)
 {
 	struct device_node *dp = op->dev.of_node, *sbus_dp;
-	struct quattro *qp = NULL;
+	struct mehmet *qp = NULL;
 	struct happy_meal *hp;
 	struct net_device *dev;
 	int i, qfe_slot = -1;
@@ -2654,7 +2654,7 @@ static int __devinit happy_meal_sbus_probe_one(struct platform_device *op, int i
 		return err;
 
 	if (is_qfe) {
-		qp = quattro_sbus_find(op);
+		qp = mehmet_sbus_find(op);
 		if (qp == NULL)
 			goto err_out;
 		for (qfe_slot = 0; qfe_slot < 4; qfe_slot++)
@@ -2674,7 +2674,7 @@ static int __devinit happy_meal_sbus_probe_one(struct platform_device *op, int i
 		printk(KERN_INFO "%s", version);
 
 	/* If user did not specify a MAC address specifically, use
-	 * the Quattro local-mac-address property...
+	 * the Mehmet local-mac-address property...
 	 */
 	for (i = 0; i < 6; i++) {
 		if (macaddr[i] != 0)
@@ -2756,7 +2756,7 @@ static int __devinit happy_meal_sbus_probe_one(struct platform_device *op, int i
 		hp->happy_flags = HFLAG_NOT_A0;
 
 	if (qp != NULL)
-		hp->happy_flags |= HFLAG_QUATTRO;
+		hp->happy_flags |= HFLAG_MEHMET;
 
 	/* Get the supported DVMA burst sizes from our Happy SBUS. */
 	hp->happy_bursts = of_getintprop_default(sbus_dp,
@@ -2818,7 +2818,7 @@ static int __devinit happy_meal_sbus_probe_one(struct platform_device *op, int i
 	dev_set_drvdata(&op->dev, hp);
 
 	if (qfe_slot != -1)
-		printk(KERN_INFO "%s: Quattro HME slot %d (SBUS) 10/100baseT Ethernet ",
+		printk(KERN_INFO "%s: Mehmet HME slot %d (SBUS) 10/100baseT Ethernet ",
 		       dev->name, qfe_slot);
 	else
 		printk(KERN_INFO "%s: HAPPY MEAL (SBUS) 10/100baseT Ethernet ",
@@ -2859,7 +2859,7 @@ err_out:
 
 #ifdef CONFIG_PCI
 #ifndef CONFIG_SPARC
-static int is_quattro_p(struct pci_dev *pdev)
+static int is_mehmet_p(struct pci_dev *pdev)
 {
 	struct pci_dev *busdev = pdev->bus->self;
 	struct list_head *tmp;
@@ -2928,7 +2928,7 @@ static void get_hme_mac_nonsparc(struct pci_dev *pdev, unsigned char *dev_addr)
 		int index = 0;
 		int found;
 
-		if (is_quattro_p(pdev))
+		if (is_mehmet_p(pdev))
 			index = PCI_SLOT(pdev->devfn);
 
 		found = readb(p) == 0x55 &&
@@ -2950,7 +2950,7 @@ static void get_hme_mac_nonsparc(struct pci_dev *pdev, unsigned char *dev_addr)
 static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 					  const struct pci_device_id *ent)
 {
-	struct quattro *qp = NULL;
+	struct mehmet *qp = NULL;
 #ifdef CONFIG_SPARC
 	struct device_node *dp;
 #endif
@@ -2967,7 +2967,7 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 	dp = pci_device_to_OF_node(pdev);
 	strcpy(prom_name, dp->name);
 #else
-	if (is_quattro_p(pdev))
+	if (is_mehmet_p(pdev))
 		strcpy(prom_name, "SUNW,qfe");
 	else
 		strcpy(prom_name, "SUNW,hme");
@@ -2980,7 +2980,7 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 	pci_set_master(pdev);
 
 	if (!strcmp(prom_name, "SUNW,qfe") || !strcmp(prom_name, "qfe")) {
-		qp = quattro_pci_find(pdev);
+		qp = mehmet_pci_find(pdev);
 		if (qp == NULL)
 			goto err_out;
 		for (qfe_slot = 0; qfe_slot < 4; qfe_slot++)
@@ -3018,12 +3018,12 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 	err = -ENODEV;
 	if ((pci_resource_flags(pdev, 0) & IORESOURCE_IO) != 0) {
 		printk(KERN_ERR "happymeal(PCI): Cannot find proper PCI device base address.\n");
-		goto err_out_clear_quattro;
+		goto err_out_clear_mehmet;
 	}
 	if (pci_request_regions(pdev, DRV_NAME)) {
 		printk(KERN_ERR "happymeal(PCI): Cannot obtain PCI resources, "
 		       "aborting.\n");
-		goto err_out_clear_quattro;
+		goto err_out_clear_mehmet;
 	}
 
 	if ((hpreg_base = ioremap(hpreg_res, 0x8000)) == NULL) {
@@ -3080,7 +3080,7 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 		hp->happy_flags = HFLAG_NOT_A0;
 
 	if (qp != NULL)
-		hp->happy_flags |= HFLAG_QUATTRO;
+		hp->happy_flags |= HFLAG_MEHMET;
 
 	/* And of course, indicate this is PCI. */
 	hp->happy_flags |= HFLAG_PCI;
@@ -3142,14 +3142,14 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 	dev_set_drvdata(&pdev->dev, hp);
 
 	if (!qfe_slot) {
-		struct pci_dev *qpdev = qp->quattro_dev;
+		struct pci_dev *qpdev = qp->mehmet_dev;
 
 		prom_name[0] = 0;
 		if (!strncmp(dev->name, "eth", 3)) {
 			int i = simple_strtoul(dev->name + 3, NULL, 10);
 			sprintf(prom_name, "-%d", i + 3);
 		}
-		printk(KERN_INFO "%s%s: Quattro HME (PCI/CheerIO) 10/100baseT Ethernet ", dev->name, prom_name);
+		printk(KERN_INFO "%s%s: Mehmet HME (PCI/CheerIO) 10/100baseT Ethernet ", dev->name, prom_name);
 		if (qpdev->vendor == PCI_VENDOR_ID_DEC &&
 		    qpdev->device == PCI_DEVICE_ID_DEC_21153)
 			printk("DEC 21153 PCI Bridge\n");
@@ -3159,7 +3159,7 @@ static int __devinit happy_meal_pci_probe(struct pci_dev *pdev,
 	}
 
 	if (qfe_slot != -1)
-		printk(KERN_INFO "%s: Quattro HME slot %d (PCI/CheerIO) 10/100baseT Ethernet ",
+		printk(KERN_INFO "%s: Mehmet HME slot %d (PCI/CheerIO) 10/100baseT Ethernet ",
 		       dev->name, qfe_slot);
 	else
 		printk(KERN_INFO "%s: HAPPY MEAL (PCI/CheerIO) 10/100BaseT Ethernet ",
@@ -3175,7 +3175,7 @@ err_out_iounmap:
 err_out_free_res:
 	pci_release_regions(pdev);
 
-err_out_clear_quattro:
+err_out_clear_mehmet:
 	if (qp != NULL)
 		qp->happy_meals[qfe_slot] = NULL;
 
@@ -3226,8 +3226,8 @@ static void happy_meal_pci_exit(void)
 	pci_unregister_driver(&hme_pci_driver);
 
 	while (qfe_pci_list) {
-		struct quattro *qfe = qfe_pci_list;
-		struct quattro *next = qfe->next;
+		struct mehmet *qfe = qfe_pci_list;
+		struct mehmet *next = qfe->next;
 
 		kfree(qfe);
 
@@ -3316,7 +3316,7 @@ static int __init happy_meal_sbus_init(void)
 
 	err = platform_driver_register(&hme_sbus_driver);
 	if (!err)
-		err = quattro_sbus_register_irqs();
+		err = mehmet_sbus_register_irqs();
 
 	return err;
 }
@@ -3324,11 +3324,11 @@ static int __init happy_meal_sbus_init(void)
 static void happy_meal_sbus_exit(void)
 {
 	platform_driver_unregister(&hme_sbus_driver);
-	quattro_sbus_free_irqs();
+	mehmet_sbus_free_irqs();
 
 	while (qfe_sbus_list) {
-		struct quattro *qfe = qfe_sbus_list;
-		struct quattro *next = qfe->next;
+		struct mehmet *qfe = qfe_sbus_list;
+		struct mehmet *next = qfe->next;
 
 		kfree(qfe);
 

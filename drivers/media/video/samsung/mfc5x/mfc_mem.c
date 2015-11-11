@@ -521,7 +521,7 @@ int mfc_init_mem_mgr(struct mfc_dev *dev)
 	/* early allocator */
 #if defined(CONFIG_S5P_MEM_CMA)
 #ifdef CONFIG_EXYNOS_CONTENT_PATH_PROTECTION
-#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_WILLOW)
+#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_MEHMET)
 	cma_infos[0].lower_bound = 0x5C100000;
 	cma_infos[0].upper_bound = 0x5F200000;
 	cma_infos[0].total_size  = 0x03100000;
@@ -581,7 +581,7 @@ int mfc_init_mem_mgr(struct mfc_dev *dev)
 		return -ENOMEM;
 	}
 
-#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_WILLOW)
+#if defined(CONFIG_USE_MFC_CMA) && defined(CONFIG_MACH_MEHMET)
 	base[0] = 0x5c100000;
 	dev->mem_infos[0].base = base[0];
 	dev->mem_infos[0].size = size;

@@ -2,10 +2,10 @@
 #include <linux/device.h>
 #include <media/v4l2-mediabus.h>
 
-#define WILLOW_PREVIEW_MIN_W 640
-#define WILLOW_PREVIEW_MIN_H 480
-#define WILLOW_PREVIEW_MAX_W 1280
-#define WILLOW_PREVIEW_MAX_H 960
+#define MEHMET_PREVIEW_MIN_W 640
+#define MEHMET_PREVIEW_MIN_H 480
+#define MEHMET_PREVIEW_MAX_W 1280
+#define MEHMET_PREVIEW_MAX_H 960
 
 struct mt9m113_platform_data {
 	unsigned int default_width;

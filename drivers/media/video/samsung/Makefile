@@ -5,6 +5,7 @@ obj-$(CONFIG_VIDEO_TVOUT)	+= tvout/
 obj-$(CONFIG_VIDEO_MFC5X)	+= mfc5x/
 obj-$(CONFIG_VIDEO_FIMG2D3X)	+= fimg2d3x/
 obj-$(CONFIG_VIDEO_FIMG2D4X)	+= fimg2d4x/
+
 ifeq ($(CONFIG_UMP_R3P1_LSI), y)
 obj-$(CONFIG_VIDEO_UMP)		+= ump_r3p1_lsi/
 else

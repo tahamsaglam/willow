@@ -47,7 +47,7 @@ static const u16 wm8985_reg_defs[] = {
 	0x0000,     /* R1  - Power management 1 */
 	0x0000,     /* R2  - Power management 2 */
 	0x0000,     /* R3  - Power management 3 */
-	0x0002,     /* R4  - Audio Interface, Main Mic ADC data appears in right phase of LRC */
+	0x0006,     /* R4  - Audio Interface, Main Mic ADC and DAC data appears in right phase of LRC */
 	0x0000,     /* R5  - Companding control */
 	0x0000,     /* R6  - Clock Gen control */
 	0x0180,     /* R7  - Additional control */
@@ -401,18 +401,18 @@ static const struct snd_kcontrol_new right_boost_mixer[] = {
 
 static const struct snd_soc_dapm_widget wm8985_dapm_widgets[] = {
 	SND_SOC_DAPM_DAC("Left DAC", "Left Playback", WM8985_POWER_MANAGEMENT_3,
-		1, 0),
-	SND_SOC_DAPM_DAC("Right DAC", "Right Playback", WM8985_POWER_MANAGEMENT_3,
 		0, 0),
+	SND_SOC_DAPM_DAC("Right DAC", "Right Playback", WM8985_POWER_MANAGEMENT_3,
+		1, 0),
 	SND_SOC_DAPM_ADC("Left ADC", "Left Capture", WM8985_POWER_MANAGEMENT_2,
 		0, 0),
 	SND_SOC_DAPM_ADC("Right ADC", "Right Capture", WM8985_POWER_MANAGEMENT_2,
 		1, 0),
 
 	SND_SOC_DAPM_MIXER("Left Output Mixer", WM8985_POWER_MANAGEMENT_3,
-		3, 0, right_out_mixer, ARRAY_SIZE(right_out_mixer)),
-	SND_SOC_DAPM_MIXER("Right Output Mixer", WM8985_POWER_MANAGEMENT_3,
 		2, 0, left_out_mixer, ARRAY_SIZE(left_out_mixer)),
+	SND_SOC_DAPM_MIXER("Right Output Mixer", WM8985_POWER_MANAGEMENT_3,
+		3, 0, right_out_mixer, ARRAY_SIZE(right_out_mixer)),
 
 	SND_SOC_DAPM_MIXER("Left Input Mixer", WM8985_POWER_MANAGEMENT_2,
 		2, 0, left_input_mixer, ARRAY_SIZE(left_input_mixer)),
@@ -430,14 +430,14 @@ static const struct snd_soc_dapm_widget wm8985_dapm_widgets[] = {
 		6, 1, NULL, 0),
 
 	SND_SOC_DAPM_PGA("Left Headphone Out", WM8985_POWER_MANAGEMENT_2,
-		8, 0, NULL, 0),
-	SND_SOC_DAPM_PGA("Right Headphone Out", WM8985_POWER_MANAGEMENT_2,
 		7, 0, NULL, 0),
+	SND_SOC_DAPM_PGA("Right Headphone Out", WM8985_POWER_MANAGEMENT_2,
+		8, 0, NULL, 0),
 
 	SND_SOC_DAPM_PGA("Left Speaker Out", WM8985_POWER_MANAGEMENT_3,
-		6, 0, NULL, 0),
-	SND_SOC_DAPM_PGA("Right Speaker Out", WM8985_POWER_MANAGEMENT_3,
 		5, 0, NULL, 0),
+	SND_SOC_DAPM_PGA("Right Speaker Out", WM8985_POWER_MANAGEMENT_3,
+		6, 0, NULL, 0),
 
 #ifdef LINEOUT_CONTROL
 	SND_SOC_DAPM_PGA("Left Lineout Out", WM8985_POWER_MANAGEMENT_3,

@@ -227,9 +227,9 @@ config SND_SOC_SPEYSIDE
 	select SND_SOC_WM8915
 	select SND_SOC_WM9081
 
-config SND_SOC_WILLOW_DAI
-	tristate "SoC I2S Audio support for WM8985, PCM Audio support for BCM4334 on WILLOW"
-	depends on SND_SOC_SAMSUNG && MACH_WILLOW
+config SND_SOC_MEHMET_DAI
+	tristate "SoC I2S Audio support for WM8985, PCM Audio support for BCM4334 on MEHMET"
+	depends on SND_SOC_SAMSUNG && MACH_MEHMET
 	select SND_SOC_WM8985
 	select SND_SOC_BCM4334
 	select SND_SAMSUNG_I2S
@@ -239,7 +239,7 @@ config SND_SOC_WILLOW_DAI
 	  Say Y if you want to add support for SoC audio on the SMDKs
 
 config  JACK_MGR
-	tristate "Willow Earjack is supported"
+	tristate "Mehmet Earjack is supported"
 	depends on SND_SOC_WM8985
 	help
-	  Say Y here to use Willow earjack
+	  Say Y here to use Mehmet earjack

@@ -94,7 +94,7 @@ struct mp_load {
   dword data[60000]; /* real interface description */
 };
 /*----------------------------------------------------------------------------*/
-/* SERVER 4BRI (Quattro PCI)                                                  */
+/* SERVER 4BRI (Mehmet PCI)                                                  */
 #define MQ_BOARD_REG_OFFSET             0x800000    /* PC relative On board registers offset  */
 #define MQ_BREG_RISC                    0x1200      /* RISC Reset ect                         */
 #define MQ_RISC_COLD_RESET_MASK         0x0001      /* RISC Cold reset                        */

@@ -15,16 +15,7 @@ config VIDEO_SAMSUNG_V4L2
 
 if CPU_EXYNOS4210 || CPU_EXYNOS4212 || CPU_EXYNOS4412
 	source "drivers/media/video/samsung/fimc/Kconfig"
-	source "drivers/media/video/samsung/tvout/Kconfig"
 	source "drivers/media/video/samsung/mfc5x/Kconfig"
-	source "drivers/media/video/samsung/ump_r3p0_lsi/Kconfig"
-	source "drivers/media/video/samsung/mali_r3p0_lsi/Kconfig"
-endif
-if (CPU_EXYNOS4210 || CPU_EXYNOS4212 || CPU_EXYNOS4412) && !SLP
-	source "drivers/media/video/samsung/mali/Kconfig"
-endif
-if SLP
-	source "drivers/media/video/samsung/mali_r3p0/Kconfig"
 endif
 
 config VIDEO_FIMG2D
@@ -38,8 +29,8 @@ config VIDEO_FIMG2D_DEBUG
 	depends on VIDEO_FIMG2D
 	default n
 
-source "drivers/media/video/samsung/fimg2d3x/Kconfig"
-source "drivers/media/video/samsung/fimg2d4x/Kconfig"
+#source "drivers/media/video/samsung/fimg2d3x/Kconfig"
+#source "drivers/media/video/samsung/fimg2d4x/Kconfig"
 
 if CPU_EXYNOS4210
 	source "drivers/media/video/samsung/jpeg/Kconfig"
@@ -63,7 +54,7 @@ config VIDEO_SAMSUNG_MEMSIZE_FIMC1
 
 config VIDEO_SAMSUNG_MEMSIZE_FIMC2
 	int "Memory size in kbytes for FIMC2"
-	depends on VIDEO_FIMC || VIDEO_SAMSUNG_S5P_FIMC
+	depends on (VIDEO_FIMC || VIDEO_SAMSUNG_S5P_FIMC) && EXYNOS4_SETUP_FIMC2
 	default "5120"
 
 config VIDEO_SAMSUNG_MEMSIZE_FIMC3

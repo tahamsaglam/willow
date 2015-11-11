@@ -56,9 +56,9 @@
 #include "atags.h"
 #include "tcm.h"
 
-#ifdef CONFIG_MACH_WILLOW
-#include <mach/willow_version.h>
-extern WILLOW_HW_VERSION willow_get_hw_version( void );
+#ifdef CONFIG_MACH_MEHMET
+#include <mach/mehmet_version.h>
+extern MEHMET_HW_VERSION mehmet_get_hw_version( void );
 #endif
 
 #ifndef MEM_SIZE
@@ -1001,8 +1001,8 @@ static int c_show(struct seq_file *m, void *v)
 {
 	int i;
 
-#ifdef CONFIG_MACH_WILLOW
-	system_rev = willow_get_hw_version();
+#ifdef CONFIG_MACH_MEHMET
+	system_rev = mehmet_get_hw_version();
 #endif
 
 	seq_printf(m, "Processor\t: %s rev %d (%s)\n",

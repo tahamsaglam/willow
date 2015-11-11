@@ -24,6 +24,7 @@
 static u64 s3c_fimc_dmamask = DMA_BIT_MASK(32);
 #endif
 
+#ifdef CONFIG_EXYNOS4_SETUP_FIMC0
 static struct resource s3c_fimc0_resource[] = {
 	[0] = {
 		.start	= S5P_PA_FIMC0,
@@ -74,7 +75,9 @@ void __init s3c_fimc0_set_platdata(struct s3c_platform_fimc *pd)
 		s3c_device_fimc0.dev.platform_data = npd;
 	}
 }
+#endif
 
+#ifdef CONFIG_EXYNOS4_SETUP_FIMC1
 static struct resource s3c_fimc1_resource[] = {
 	[0] = {
 		.start	= S5P_PA_FIMC1,
@@ -131,7 +134,9 @@ void __init s3c_fimc1_set_platdata(struct s3c_platform_fimc *pd)
 		s3c_device_fimc1.dev.platform_data = npd;
 	}
 }
+#endif
 
+#ifdef CONFIG_EXYNOS4_SETUP_FIMC2
 static struct resource s3c_fimc2_resource[] = {
 	[0] = {
 		.start	= S5P_PA_FIMC2,
@@ -182,7 +187,9 @@ void __init s3c_fimc2_set_platdata(struct s3c_platform_fimc *pd)
 		s3c_device_fimc2.dev.platform_data = npd;
 	}
 }
+#endif
 
+#ifdef CONFIG_EXYNOS4_SETUP_FIMC3
 static struct resource s3c_fimc3_resource[] = {
 	[0] = {
 		.start	= S5P_PA_FIMC3,
@@ -232,4 +239,4 @@ void __init s3c_fimc3_set_platdata(struct s3c_platform_fimc *pd)
 		s3c_device_fimc3.dev.platform_data = npd;
 	}
 }
-
+#endif

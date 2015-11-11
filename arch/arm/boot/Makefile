@@ -60,6 +60,8 @@ ifeq ($(CONFIG_CRYPTO_FIPS),y)
 	$(MKFIPS) $(obj)/zImage
 endif
 	@echo '  Kernel: $@ is ready'
+	@echo '          => zImage, copy to ../img/zImage'
+	@cp -a $(obj)/zImage ../img/zImage
 
 endif
 

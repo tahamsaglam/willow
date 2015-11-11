@@ -513,11 +513,35 @@ static bool charger_online(void)
 static void max8903_work(struct work_struct *work)
 {
 	struct max8903_data* data;
+	struct max8903_pdata *pdata;
 	static int msg_update_cnt =0;
 	static int old_soc = 0;
 	int soc = fg_read_soc();
+	int ta_in, usb_in;
 
 	data = container_of(work, struct max8903_data, work.work);
+
+	pdata = data->pdata;
+
+	if(pdata) {
+		ta_in = gpio_get_value(pdata->dok) ? 0 : 1;
+		usb_in = gpio_get_value(pdata->uok) ? 0 : 1;
+	} else {
+		ta_in = data->ta_in;
+		usb_in = data->usb_in;
+	}
+
+	if ( ta_in && usb_in ) {
+		usb_is_connected = true;
+		dc_is_connected = false;
+	} else if ( ta_in ) {
+		usb_is_connected = false;
+		dc_is_connected = true;
+	} else {
+		usb_is_connected = false;
+		dc_is_connected = false;
+	}
+
 
 #ifdef SUPPORT_USB_STATE
 	if(!data->usb_in && !data->ta_in)
@@ -527,8 +551,18 @@ static void max8903_work(struct work_struct *work)
 	else if(data->usb_in)
 		power_supply_changed(&data->usb);
 #else
-	if(old_soc != soc)
+	if(old_soc != soc || (data->ta_in != ta_in) || (data->usb_in != usb_in)) {
+#ifdef FEATURE_TOUCH_NOISE
+		if(data->ta_in != ta_in) {
+			atm1664_power_noise(ta_in); 	
+		}
+#endif
+
+		data->ta_in = ta_in;
+		data->usb_in = usb_in;
+
 		g_update_need = true;
+	}
 
 	if(g_update_need) {
 #ifdef BATTERY_DEBUG

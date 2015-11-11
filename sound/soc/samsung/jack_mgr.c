@@ -174,17 +174,17 @@ static void  jack_mgr_buttons_disconnect(struct input_handle *handle)
 	input_unregister_handle(handle);
 }
 
-/// WILLOW 4pole earjack remote key detection
-static int willow_curr_headset_type = SEC_JACK_NO_DEVICE;
-int willow_jack_get_type(void)
+/// MEHMET 4pole earjack remote key detection
+static int mehmet_curr_headset_type = SEC_JACK_NO_DEVICE;
+int mehmet_jack_get_type(void)
 {
-	return willow_curr_headset_type;
+	return mehmet_curr_headset_type;
 }
 
-#define WILLOW_REMOTE_KEY_ADC_ID		2
+#define MEHMET_REMOTE_KEY_ADC_ID		2
 int jack_mgr_get_adc_data(void)
 {
-	int adc =  s3c_adc_read(adc_client, WILLOW_REMOTE_KEY_ADC_ID);
+	int adc =  s3c_adc_read(adc_client, MEHMET_REMOTE_KEY_ADC_ID);
 	return adc;
 }
 
@@ -195,8 +195,8 @@ static void jack_mgr_set_type(struct jack_mgr_info *hi, int jack_type)
 	DEBUG_MSG("[%s] jack_type : %d\n",__func__, jack_type);
 
 
-/// WILLOW 4pole earjack remote key detection
-	willow_curr_headset_type = jack_type;
+/// MEHMET 4pole earjack remote key detection
+	mehmet_curr_headset_type = jack_type;
 
 	/* this can happen during slow inserts where we think we identified
 	 * the type but then we get another interrupt and do it again

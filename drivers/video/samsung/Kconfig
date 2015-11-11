@@ -124,7 +124,7 @@ config FB_S5P_AMS369FG06
 
 config FB_S5P_LTN101AL03
 	bool "LTN101AL03"
-	depends on MACH_WILLOW
+	depends on MACH_MEHMET
 	help
 	  This enables support for 10.1" 1280*800 Samsung LCD panel
 

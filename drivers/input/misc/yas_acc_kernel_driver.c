@@ -33,8 +33,8 @@
 #endif
 
 
-#undef WILLOW_SENSOR_REGULATOR_CONTROL
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#undef MEHMET_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
 #include <linux/regulator/consumer.h>
 #endif 
 
@@ -129,7 +129,7 @@ struct yas_acc_private_data {
     struct yas_acc_data last;
     int suspend;
     int suspend_enable;
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     struct regulator *regulator;
 #endif 
 #ifdef CONFIG_HAS_EARLYSUSPEND
@@ -818,7 +818,7 @@ static int yas_acc_probe(struct i2c_client *client, const struct i2c_device_id *
 {
     struct yas_acc_private_data *data;
     int err;
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     int ret;
 #endif
     /* Setup private data */
@@ -829,7 +829,7 @@ static int yas_acc_probe(struct i2c_client *client, const struct i2c_device_id *
     }
     yas_acc_set_data(data);
 
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     data->regulator = regulator_get(&client->dev, "vdd_sensor");
     if(IS_ERR(data->regulator)) {
         printk(KERN_ERR "[accelerometer] failed to get regulator\n");
@@ -895,7 +895,7 @@ static int yas_acc_probe(struct i2c_client *client, const struct i2c_device_id *
     yas_acc_input_fini(data);
  ERR3:
     yas_acc_core_driver_fini(data);
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
  regulator_err:
     regulator_disable(data->regulator);
     regulator_put(data->regulator);
@@ -925,7 +925,7 @@ void yas_acc_early_suspend(struct early_suspend *h)
     data->suspend = 1;
     mutex_unlock(&data->data_mutex);
 
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     regulator_disable(data->regulator);
 #endif
 
@@ -938,7 +938,7 @@ void yas_acc_late_resume(struct early_suspend *h)
     struct yas_acc_driver *driver = data->driver;
     int delay;
 
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     regulator_enable(data->regulator);
 #endif
 
@@ -967,7 +967,7 @@ static int yas_acc_remove(struct i2c_client *client)
     sysfs_remove_group(&data->input->dev.kobj, &yas_acc_attribute_group);
     yas_acc_input_fini(data);
     yas_acc_core_driver_fini(data);
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     regulator_disable(data->regulator);
 #endif
     kfree(data);
@@ -983,7 +983,7 @@ static int yas_acc_suspend(struct i2c_client *client, pm_message_t mesg)
 
     mutex_lock(&data->data_mutex);
 
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     regulator_disable(data->regulator);
 #endif
 
@@ -1009,7 +1009,7 @@ static int yas_acc_resume(struct i2c_client *client)
 
     mutex_lock(&data->data_mutex);
 
-#ifdef WILLOW_SENSOR_REGULATOR_CONTROL
+#ifdef MEHMET_SENSOR_REGULATOR_CONTROL
     regulator_enable(data->regulator);
 #endif
 

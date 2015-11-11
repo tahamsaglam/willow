@@ -89,9 +89,9 @@ static void s3c_csis_set_lntv(struct platform_device *pdev, int hsync_Lintv,int 
 
 	cfg = readl(s3c_csis[pdev->id]->regs + S3C_CSIS_CONFIG);
 
-	cfg |= hsync_Lintv << WILLOW_CONFIG_HSYNC_LINTV_SHIFT;
-	cfg |= vsync_Lintv << WILLOW_CONFIG_VSYNC_SINTV_SHIFT;
-	cfg |= hsync_Eintv << WILLOW_CONFIG_VSYNC_EINTV_SHIFT;
+	cfg |= hsync_Lintv << MEHMET_CONFIG_HSYNC_LINTV_SHIFT;
+	cfg |= vsync_Lintv << MEHMET_CONFIG_VSYNC_SINTV_SHIFT;
+	cfg |= hsync_Eintv << MEHMET_CONFIG_VSYNC_EINTV_SHIFT;
 
 	writel(cfg, s3c_csis[pdev->id]->regs + S3C_CSIS_CONFIG);
 }

@@ -305,4 +305,5 @@ const struct v4l2_ioctl_ops fimc_v4l2_ops = {
 	.vidioc_s_fmt_vid_overlay	= fimc_s_fmt_vid_overlay,
 	.vidioc_enum_framesizes		= fimc_enum_framesizes,
 	.vidioc_enum_frameintervals	= fimc_enum_frameintervals,
+	.vidioc_log_status          = fimc_log_status,
 };

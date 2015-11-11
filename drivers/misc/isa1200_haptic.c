@@ -21,7 +21,7 @@
 #include <linux/i2c/isa1200.h>
 #include "../staging/android/timed_output.h"
 
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 #include <linux/slab.h>
 
 #undef DEBUG_HAPTIC
@@ -34,7 +34,7 @@
 
 #define PWM_PERIOD    (89284 / 2)
 #define PWM_DUTY      (87280 / 2)
-#endif //CONFIG_MACH_WILLOW
+#endif //CONFIG_MACH_MEHMET
 
 #define ISA1200_SCTRL0		0x00
 #define ISA1200_THSWRST		(1 << 7)
@@ -139,7 +139,7 @@ struct isa1200_chip {
 
 static int isa1200_chip_set_pwm_cycle(struct isa1200_chip *haptic)
 {
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	return pwm_config(haptic->pwm, PWM_DUTY, PWM_PERIOD);
 #else
 	return pwm_config(haptic->pwm, PWM_HAPTIC_PERIOD/2, PWM_HAPTIC_PERIOD);
@@ -176,7 +176,7 @@ static void isa1200_chip_power_on(struct isa1200_chip *haptic)
 	/* Use smart mode enable control */
 	pwm_enable(haptic->pwm);
 
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	// 3.6. Haptic Functin Enable/Disable Sequence
 	gpio_set_value(haptic->pdata->hap_en_gpio, 1);
 	udelay(250);
@@ -191,7 +191,7 @@ static void isa1200_chip_power_off(struct isa1200_chip *haptic)
 	/* Use smart mode enable control */
 	pwm_disable(haptic->pwm);
 
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	// 3.6. Haptic Functin Enable/Disable Sequence
 	gpio_set_value(haptic->pdata->hap_en_gpio, 0);
 	udelay(250);
@@ -245,7 +245,7 @@ static int isa1200_chip_get_time(struct timed_output_dev *dev)
 
 	if (hrtimer_active(&haptic->timer)) {
 		ktime_t r = hrtimer_get_remaining(&haptic->timer);
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 		return ktime_to_ms(r);
 #else
 		return r.tv.sec * 1000 + r.tv.nsec / 1000000;
@@ -264,7 +264,7 @@ static enum hrtimer_restart isa1200_vib_timer_func(struct hrtimer *timer)
 }
 static void isa1200_setup(struct i2c_client *client)
 {
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	isa1200_write_reg(client, ISA1200_SCTRL0, ISA1200_LDOADJ_30V);
 	isa1200_write_reg(client, ISA1200_HCTRL1, ISA1200_BIT6_ON | ISA1200_MOTTYP_LRA); // bit6 is reserved bit
 	isa1200_write_reg(client, ISA1200_HCTRL2, 0x00);
@@ -273,7 +273,7 @@ static void isa1200_setup(struct i2c_client *client)
 	isa1200_write_reg(client, ISA1200_HCTRL5, 0x00); // PWM High Duty
 	isa1200_write_reg(client, ISA1200_HCTRL6, 0x00); // PWM Period
 	isa1200_write_reg(client, ISA1200_HCTRL0, 0x88); // Normal Operation Mode, PWM Input Mode
-#else //CONFIG_MACH_WILLOW
+#else //CONFIG_MACH_MEHMET
 	struct isa1200_chip *haptic = i2c_get_clientdata(client);
 	int value;
 
@@ -367,7 +367,7 @@ static int __devinit isa1200_probe(struct i2c_client *client,
 					pdata->hap_en_gpio);
 		goto gpio_fail;
 	}
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	gpio_direction_output(pdata->hap_en_gpio, 0);
 #endif
 
@@ -415,7 +415,7 @@ static int isa1200_suspend(struct i2c_client *client, pm_message_t mesg)
 	if (haptic->pdata->power_on)
 		haptic->pdata->power_on(0);
 
-#ifdef CONFIG_MACH_WILLOW
+#ifdef CONFIG_MACH_MEHMET
 	//Power Down Mode
 	isa1200_write_reg(client, ISA1200_HCTRL0, 0x00);
 	dbg("ISA1200_HCTRL0 0x%02X \n", isa1200_read_reg(client, ISA1200_HCTRL0));

@@ -41,7 +41,7 @@
 #define FEATURE_TOUCH_1ST_POINT
 #define FEATURE_TOUCH_DEBUG
 #define FEATURE_TOUCH_NOISE
-#define FEATURE_V_1_3
+#undef FEATURE_TOUCH_WIFI_TOOL
 
 #define S_PEN_USER 00666
 /*#######################################*/
@@ -98,10 +98,21 @@
 #define MXT_STATE_PRESS         1
 #define MXT_STATE_MOVE          2
 
-#define MAX_USING_FINGER_NUM 10
+#define MAX_USING_FINGER_NUM 11 //20130925: 9 finger issue
 
 #define MXT_SW_RESET_TIME               300             /* msec */
 #define MXT_HW_RESET_TIME               300     /* msec */
+#define MXT_STYLUS_PRESS       (1 << 0)
+#define MXT_STYLUS_RELEASE     (1 << 1)
+#define MXT_STYLUS_MOVE        (1 << 2)
+#define MXT_STYLUS_SUPPRESS    (1 << 3)
+
+#define MXT_STYLUS_DETECT      (1 << 4)
+#define MXT_STYLUS_TIP         (1 << 5)
+#define MXT_STYLUS_ERASER      (1 << 6)
+#define MXT_STYLUS_BARREL      (1 << 7)
+
+#define MXT_STYLUS_PRESSURE_MASK       0x3F
 
 enum { 
 	RESERVED_T0 = 0,
@@ -168,12 +179,19 @@ enum {
 	PROCI_LENSBENDING_T65=65,
 	SPT_GOLDENREFERENCES_T66=66,
 	SPT_SERIALDATACOMMAND_T68=68,
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	SPT_DYNAMICCONFIGURATIONCONTROLLER_T70=70,
 	SPT_DYNAMICCONFIGURATIONCONTAINER_T71=71,
+#ifdef FEATURE_TOUCH_V20
+        PROCI_ZONEINDICATION_T73=73,
+        SPT_CTESCANCONFIG_T77=77,
+        SPT_TOUCHEVENTTRIGGER_T79=79,
+#endif
 #endif
 	RESERVED_T255 = 255,
 };
+
+enum mxt_device_state { INIT, APPMODE, BOOTLOADER, FAILED, SHUTDOWN, SUSPEND };
 
 struct mxt_platform_data 
 {
@@ -263,6 +281,7 @@ struct mxt_data
 #ifdef FEATURE_TOUCH_TOUCH_BOOSTER
 	struct delayed_work dvfs_dwork;
 #endif
+	struct delayed_work tune_dwork;
 	void (*power_on)(void);
 	void (*power_off)(void);
 	void (*register_cb)(void *);
@@ -270,6 +289,14 @@ struct mxt_data
 	int num_fingers;
 	u16 last_read_addr;
 	u16 msg_proc_addr;
+
+#ifdef FEATURE_TOUCH_WIFI_TOOL
+        // for Wi-Fi tool
+        bool debug_enabled;
+        struct bin_attribute mem_access_attr;
+        enum mxt_device_state state;
+        u16 mem_size;
+#endif
 	struct finger_info fingers[];
 };
  
@@ -323,8 +350,8 @@ typedef struct {
 	uint8_t nMRGTIMEOUT;
 	uint8_t nMOVHYSTI;
 	uint8_t nMOVHYSTN;
-#ifdef FEATURE_V_1_3
-	uint8_t nRESERVED;
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
+	uint8_t nRESERVED1;
 #else
 	uint8_t nMOVFILTER;
 #endif
@@ -348,10 +375,17 @@ typedef struct {
 	uint8_t nYPITCH;
 	uint8_t nNEXTTCHDI;
 	uint8_t nCFG;
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	uint8_t nMOVFILTER2;
 	uint8_t nMOVSMOOTH;
 	uint8_t nMOVPRED;
+#ifdef FEATURE_TOUCH_V20
+        uint8_t nTRACKTHRSF;
+        uint8_t nNOISETHRSF;
+        uint32_t nRESERVED2;
+        uint8_t nMRGTHRADJSTR;
+        uint8_t nCUTOFFTHR;
+#endif
 #endif
 } __packed touch_multitouchscreen_t9_config_t;
 
@@ -382,7 +416,7 @@ typedef struct {
 	uint8_t intpullup;        /*  Port pull-up per pin enable register */
 	uint8_t out;              /*  Port OUT register*/
 	uint8_t wake;             /*  Port wake on change enable register  */
-#ifndef FEATURE_V_1_3
+#if !defined(FEATURE_TOUCH_V13) || !defined(FEATURE_TOUCH_V20)
 	uint8_t pwm;              /*  Port pwm enable register    */
 	uint8_t period;           /*  PWM period (min-max) percentage*/
 	uint8_t duty[4];          /*  PWM duty cycles percentage */
@@ -423,7 +457,7 @@ typedef struct {
 typedef struct {
 	uint8_t nCTRL;
 	uint8_t nNUMGEST;
-	uint8_t nGESTEN[2];
+	uint16_t nGESTEN;
 	uint8_t nPROCESS;
 	uint8_t nTAPTO;
 	uint8_t nFLICKTO;
@@ -431,10 +465,10 @@ typedef struct {
 	uint8_t nSPRESSTO;
 	uint8_t nLPRESSTO;
 	uint8_t nREPPRESSTO;
-	uint8_t nFLICKTHR[2];
-	uint8_t nDRAGTHR[2];
-	uint8_t nTAPTHR[2];
-	uint8_t nTHROWTHR[2];
+	uint16_t nFLICKTHR;
+	uint16_t nDRAGTHR;
+	uint16_t nTAPTHR;
+	uint16_t nTHROWTHR;
 } __packed proci_onetouchgestureprocessor_t24;
 
 typedef struct {
@@ -443,6 +477,9 @@ typedef struct {
 	uint16_t nUPSIGLIM[3];
 	uint16_t nLOSIGLIM[3];
 	uint16_t nPINDWELLUS;
+#ifdef FEATURE_TOUCH_V20
+        uint16_t nSIGRANGELIM[3];
+#endif
 } __packed spt_selftest_t25_config_t;
 
 typedef struct {
@@ -494,7 +531,7 @@ typedef struct {
 	uint8_t nSHAPESTRENGTH;
 	uint8_t nSUPDIST;
 	uint8_t nDISTHYST;
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	uint8_t nMAXSCRNAREA;
 	uint8_t nCFG;
 	uint8_t nRESERVED;
@@ -512,7 +549,7 @@ typedef struct {
 	uint8_t nHEIGHTOFFSET;
 	uint8_t nWIDTHSCALE;
 	uint8_t nWIDTHOFFSET;
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	uint8_t nCFG;
 #else
 	uint8_t nRESERVED;
@@ -525,10 +562,18 @@ typedef struct {
 	uint8_t nMODE;
 	uint8_t nIDLESYNCSPERX;
 	uint8_t nACTVSYNCSPERX;
+#ifndef FEATURE_TOUCH_V20
 	uint8_t nADCSPERSYNC;
+#else
+        uint8_t nRESERVED1;
+#endif
 	uint8_t nPULSESPERADC;
 	uint8_t nXSLEW;
+#ifndef FEATURE_TOUCH_V20
 	uint16_t nSYNCDELAY;
+#else
+        uint16_t nRESERVED2;
+#endif
 	uint8_t nXVOLTAGE;
 	uint8_t nADCCTRL;
 } __packed spt_cteconfig_t46_config_t;
@@ -550,11 +595,15 @@ typedef struct {
 	uint8_t nRESERVED[7];
 	uint8_t nSUPSTYTO;
 	uint8_t nMAXNUMSTY;
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	uint8_t nXEDGECTRL;
 	uint8_t nXEDGEDIST;
 	uint8_t nYEDGECTRL;
 	uint8_t nYEDGEDIST;
+#ifdef FEATURE_TOUCH_V20
+        uint8_t nSUPTO;
+        uint8_t nSUPCLASSMODE;
+#endif
 #endif
 } __packed proci_stylus_t47_config_t;
 
@@ -707,8 +756,12 @@ typedef struct {
  	uint8_t  nCALCFG2 ;
  	uint8_t  nCALCFG3 ;
  	uint8_t  nCFG1 ;
+#if defined(FEATURE_TOUCH_V20)
+        uint8_t  nFALLTHR;
+#else
  	uint8_t  nRESERVED1 ;
- 	uint8_t  nRESERVED2 ;
+#endif
+        uint8_t  nMINTHRADJ;
  	uint8_t  nBASEFREQ ;
  	uint8_t  nMAXSELFREQ ;
  	uint8_t  nFREQ[5] ;
@@ -785,7 +838,7 @@ typedef struct {
 	uint8_t nSUPDIST  ;
 	uint8_t nSUPDISTHYST  ;
 	uint8_t nSUPTO  ;
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 	uint8_t nXEDGECTRL;
 	uint8_t nXEDGEDIST;
 	uint8_t nYEDGECTRL;
@@ -794,8 +847,13 @@ typedef struct {
 	uint8_t nMOVFILTER2;
 	uint8_t nMOVSMOOTH;
 	uint8_t nMOVPRED;
+#ifdef FEATURE_TOUCH_V20
+        uint16_t nMOVHYSTI;
+        uint16_t nMOVHYSTN;
+        uint8_t nSUPCLASSMODE;
 #endif
-} __packed proci_activestylues_t63_t;
+#endif
+} __packed proci_activestylus_t63_t;
 
 	
 typedef struct {
@@ -831,7 +889,7 @@ typedef struct {
 	uint8_t nRESERVED1[2];
 } __packed spt_serialdatacommand_t68_t;
 
-#ifdef FEATURE_V_1_3
+#if defined(FEATURE_TOUCH_V13) || defined(FEATURE_TOUCH_V20)
 typedef struct {
 	uint8_t nCTRL;
 	uint16_t nEVENT;
@@ -846,6 +904,30 @@ typedef struct {
 typedef struct {
 	uint8_t nDATA[168];
 } __packed spt_dynamicconfigurationcontainer_t71_t;
+#endif
+
+#ifdef FEATURE_TOUCH_V20
+typedef struct {
+	uint8_t nCTRL;
+        uint8_t nXORIGIN;
+        uint8_t nYORIGIN;
+        uint8_t nXSIZE;
+        uint8_t nYSIZE;
+        uint8_t nINDPERIOD;
+} __packed proci_zoneindication_t73_t;
+
+typedef struct {
+	uint8_t nCTRL;
+        uint8_t nACTVPRCSSCNEXT;
+        uint8_t nXZOOMGAIN;
+        uint8_t nXZOOMTCHTHR;
+} __packed spt_ctescanconfig_t77_t;
+
+typedef struct {
+	uint8_t nCTRL;
+        uint8_t nTOUCHCLASS;
+        uint8_t nTCHRELTO;
+} __packed spt_toucheventtrigger_t79_t;
 #endif
 
 typedef struct {

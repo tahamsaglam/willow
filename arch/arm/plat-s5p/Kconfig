@@ -146,7 +146,7 @@ config S5P_DEV_DP
 config S5P_DEV_TVOUT
 	bool
 	depends on VIDEO_TVOUT
-	default y
+	default n
 	help
 	  Compile in platform device definitions for TVOUT
 

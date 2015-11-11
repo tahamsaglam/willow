@@ -2769,7 +2769,7 @@ int s5p_tvif_ctrl_start(
 		dev_lock(s5p_tvif_ctrl_private.bus_dev,
 				s5p_tvif_ctrl_private.dev, BUSFREQ_400MHZ);
 	}
-#if defined(CONFIG_MACH_WILLOW)
+#if defined(CONFIG_MACH_MEHMET)
 	else {
 		dev_lock(s5p_tvif_ctrl_private.bus_dev,
 				s5p_tvif_ctrl_private.dev, BUSFREQ_133MHZ);

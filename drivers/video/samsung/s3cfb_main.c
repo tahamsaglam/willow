@@ -146,21 +146,6 @@ static long long s3cfb_get_system_time(void)
 #endif
     return vsync;
 }
-static void s3c_vsync_kobject_uevent(void)
-{
-    char env_buf[120];
-    char *envp[2];
-    int env_offset = 0;
-    long long cur_vsync;
-
-    cur_vsync = s3cfb_get_system_time();
-    sprintf(env_buf, "VSYNC=%lld",cur_vsync);
-    envp[env_offset++] = env_buf;
-    envp[env_offset] = NULL;
-    kobject_uevent_env(&( fbfimd->fbdev[0]->dev->kobj), KOBJ_CHANGE, envp);
-
-}
-static DECLARE_WORK(vsync_work, (void *)s3c_vsync_kobject_uevent);
 static ssize_t s3cfb_sysfs_show_vsync_report(struct device *dev, struct device_attribute *attr,
 		char *buf)
 {
@@ -195,8 +180,6 @@ static irqreturn_t s3cfb_irq_frame(int irq, void *dev_id)
 
 #if defined(CONFIG_FB_S5P_VSYNC_THREAD)
 	spin_unlock(&fbdev[0]->vsync_slock);
-#else
-	schedule_work(&vsync_work);
 #endif
 	return IRQ_HANDLED;
 }
@@ -818,7 +801,7 @@ void s3cfb_early_suspend(struct early_suspend *h)
 	return ;
 }
 
-extern void willow_backlight_on(void);
+extern void mehmet_backlight_on(void);
 
 void s3cfb_late_resume(struct early_suspend *h)
 {
@@ -904,7 +887,7 @@ void s3cfb_late_resume(struct early_suspend *h)
 #if defined(CONFIG_FB_S5P_LTN101AL03)
 	LTN101AL03_backlight_onoff(1);
 	set_backlight_ctrl(1);
-	willow_backlight_on();
+	mehmet_backlight_on();
 #endif
 
 	info->system_state = POWER_ON;

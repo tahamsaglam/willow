@@ -989,6 +989,16 @@ static ssize_t enable_show(struct device *pdev, struct device_attribute *attr,
 	return sprintf(buf, "%d\n", dev->enabled);
 }
 
+typedef struct tw_con {
+  struct mutex mlock;
+  bool enable_block;
+} tw_con_type;
+
+static tw_con_type gTw_con = {
+  .mlock = NULL,
+  .enable_block = false,
+};
+
 static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 			    const char *buff, size_t size)
 {
@@ -1000,6 +1010,11 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 	mutex_lock(&dev->mutex);
 
 	sscanf(buff, "%d", &enabled);
+
+        if (gTw_con.enable_block && enabled) {
+          return size;
+        }
+
 	if (enabled && !dev->enabled) {
 		/* update values in composite driver's copy of device descriptor */
 		cdev->desc.idVendor = device_desc.idVendor;
@@ -1029,6 +1044,38 @@ static ssize_t enable_store(struct device *pdev, struct device_attribute *attr,
 	mutex_unlock(&dev->mutex);
 	return size;
 }
+
+static ssize_t tw_con_show(struct device *pdev, 
+                           struct device_attribute *attr,
+			   char *buf) {
+  return sprintf(buf, "%d\n", gTw_con.enable_block);
+}
+
+static ssize_t tw_con_store(struct device *pdev, 
+                            struct device_attribute *attr,
+			    const char *buff, 
+                            size_t size) {
+
+  /*
+   * this plays a role to set only.
+   * reading case extends to 'enable_store'
+   */
+  int enable_block = 0;
+
+  sscanf(buff, "%d", &enable_block);
+
+  mutex_lock(&gTw_con.mlock);
+
+  if (enable_block == true) {
+    gTw_con.enable_block = true;
+  } else {
+    gTw_con.enable_block = false;
+  }
+
+  mutex_unlock(&gTw_con.mlock);
+  return size;
+}
+
 
 static ssize_t state_show(struct device *pdev, struct device_attribute *attr,
 			   char *buf)
@@ -1101,6 +1148,7 @@ DESCRIPTOR_STRING_ATTR(iSerial, serial_string)
 static DEVICE_ATTR(functions, S_IRUGO | S_IWUSR, functions_show, functions_store);
 static DEVICE_ATTR(enable, S_IRUGO | S_IWUSR, enable_show, enable_store);
 static DEVICE_ATTR(state, S_IRUGO, state_show, NULL);
+static DEVICE_ATTR(tw_enable_block, S_IRUGO | S_IWUSR, tw_con_show, tw_con_store);
 
 static struct device_attribute *android_usb_attributes[] = {
 	&dev_attr_idVendor,
@@ -1115,6 +1163,7 @@ static struct device_attribute *android_usb_attributes[] = {
 	&dev_attr_functions,
 	&dev_attr_enable,
 	&dev_attr_state,
+        &dev_attr_tw_enable_block,
 	NULL
 };
 
@@ -1321,6 +1370,7 @@ static int __init init(void)
 	INIT_LIST_HEAD(&dev->enabled_functions);
 	INIT_WORK(&dev->work, android_work);
 	mutex_init(&dev->mutex);
+	mutex_init(&gTw_con.mlock);
 
 	err = android_create_device(dev);
 	if (err) {

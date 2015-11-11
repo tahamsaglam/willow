@@ -32,12 +32,12 @@
 #endif
 
 #if DEBUG_RETRY_TEST
-int cam_test_cnt = 0;
-int cam_retry_cnt = 0;
+static int cam_test_cnt = 0;
+static int cam_retry_cnt = 0;
 #endif
 
 //#define FEATURE_TW_CAMERA_FIXED_PREVIEW
-extern int willow_capture_status;
+extern int mehmet_capture_status;
 
 extern int get_camera_test(void);
 
@@ -60,7 +60,7 @@ extern void exynos_cpufreq_lock_free(unsigned int nId);
 #define as0260_THUMB_MAXSIZE	0xFC00
 #define as0260_POST_MAXSIZE	0xBB800
 
-struct i2c_client *backup_client;
+static struct i2c_client *backup_client;
 
 /* Camera functional setting values configured by user concept */
 struct as0260_userset {
@@ -357,7 +357,7 @@ static int as0260_i2c_write(struct v4l2_subdev *sd, unsigned char *txdata, int l
 	return 0;
 }
 
-int as0260_32_write_reg(struct v4l2_subdev *sd,u16 cmd, u32 val)
+static int as0260_32_write_reg(struct v4l2_subdev *sd,u16 cmd, u32 val)
 {
 	unsigned char buf[4];
 	int err=0;
@@ -658,7 +658,7 @@ static int as0260_i2c_test_read_regs(struct v4l2_subdev *sd,
 }
 #endif
 
-int issueCommand(struct v4l2_subdev *sd, const HOST_COMMAND_E command)
+static int issueCommand(struct v4l2_subdev *sd, const HOST_COMMAND_E command)
 {
 	int cnt=0;
 	u16 buf=0;
@@ -688,7 +688,7 @@ int issueCommand(struct v4l2_subdev *sd, const HOST_COMMAND_E command)
 	return -1;
 }
 
-int checkCommand(struct v4l2_subdev *sd, u16 cmd)
+static int checkCommand(struct v4l2_subdev *sd, u16 cmd)
 {
 	int cnt=0;
 	u16 buf=0;
@@ -729,7 +729,7 @@ int checkCommand(struct v4l2_subdev *sd, u16 cmd)
 	return -1;
 }
 
-SYSTEM_STATE_E getSystemState(struct v4l2_subdev *sd)
+static SYSTEM_STATE_E getSystemState(struct v4l2_subdev *sd)
 {
 	//unsigned long read_value=0;
 	int err = -EINVAL;
@@ -775,7 +775,7 @@ SYSTEM_STATE_E getSystemState(struct v4l2_subdev *sd)
 }
 
 
-int changestate(struct v4l2_subdev *sd,SYSTEM_STATE_E state_d, HOST_COMMAND_E cmd_d)
+static int changestate(struct v4l2_subdev *sd,SYSTEM_STATE_E state_d, HOST_COMMAND_E cmd_d)
 {
 	//int res;
 	int err = -EINVAL;
@@ -805,7 +805,7 @@ int changestate(struct v4l2_subdev *sd,SYSTEM_STATE_E state_d, HOST_COMMAND_E cm
 	return 0;	
 }
 
-int changeConfig(struct v4l2_subdev *sd)
+static int changeConfig(struct v4l2_subdev *sd)
 {
 	int res;
 	int err = -EINVAL;
@@ -828,7 +828,7 @@ int changeConfig(struct v4l2_subdev *sd)
 
 
 // requests system enter standby
-int enterStandby(struct v4l2_subdev *sd)
+static int enterStandby(struct v4l2_subdev *sd)
 {
 	int res;
 	int err = -EINVAL;
@@ -847,7 +847,7 @@ int enterStandby(struct v4l2_subdev *sd)
 	return getSystemState(sd);
 }
 
-int startStreaming(struct v4l2_subdev *sd)
+static int startStreaming(struct v4l2_subdev *sd)
 {
 	int res;
 	int err = -EINVAL;
@@ -868,7 +868,7 @@ int startStreaming(struct v4l2_subdev *sd)
 
 	
 // requests system leave standby
-int leaveStandby(struct v4l2_subdev *sd)
+static int leaveStandby(struct v4l2_subdev *sd)
 {
 	int res;
 	int err = -EINVAL;
@@ -888,7 +888,7 @@ int leaveStandby(struct v4l2_subdev *sd)
 }
 
 // requests a Refresh operation
-int refresh(struct v4l2_subdev *sd)
+static int refresh(struct v4l2_subdev *sd)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 
@@ -905,7 +905,7 @@ int refresh(struct v4l2_subdev *sd)
 
 #if defined(FEATURE_TW_CAMERA_P_REG_WRITE)
 // requests system leave standby
-int waitForEvent(struct v4l2_subdev *sd)
+static int waitForEvent(struct v4l2_subdev *sd)
 {
 	int res;
 	//int err = -EINVAL;
@@ -1227,7 +1227,7 @@ static int as0260_set_preview_stop(struct v4l2_subdev *sd)
 	return err;
 }
 
-const char * const *as0260_ctrl_get_menu(u32 id)
+static const char * const *as0260_ctrl_get_menu(u32 id)
 {
 	switch (id) {
 	case V4L2_CID_WHITE_BALANCE_PRESET:
@@ -1470,7 +1470,7 @@ static int as0260_get_framesize_index(struct v4l2_subdev *sd)
 	__func__, state->req_fmt.width, state->req_fmt.height);
 
 #if defined(FEATURE_TW_CAMERA_FIXED_PREVIEW)
-	if(willow_capture_status==0)
+	if(mehmet_capture_status==0)
 	return AS0260_PREVIEW_2M; //VGA
 #endif
 
@@ -1542,7 +1542,7 @@ static int as0260_s_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *fmt)
 	framesize_index = as0260_get_framesize_index(sd);
 	err = as0260_set_framesize_index(sd, framesize_index);
 
-	if(willow_capture_status==0){
+	if(mehmet_capture_status==0){
 		as0260_set_resolution_reg(sd,state->framesize_index);
 		changestate(sd,SS_ENTER_CONFIG_CHANGE,HC_SET_STATE);
 	}
@@ -1778,6 +1778,17 @@ static int as0260_init(struct v4l2_subdev *sd, u32 val)
 	as0260_i2c_16_read(client, 0x001c,&buf16);
 	as0260_info(&client->dev,"as0260_init ______ AS0260 MCU BOOT MODE =0x%x\n",buf16);
 
+	int cnt = 0;
+	as0260_i2c_16_read(client, 0x0080,&buf16);
+	buf16 = buf16 & 0x02;
+	while(buf16!=0x0) {
+	    if(++cnt == 100)
+		break;
+	    msleep(10);
+	    as0260_i2c_16_read(client, 0x0080,&buf16);
+	    buf16 = buf16 & 0x02;
+	}
+
 	as0260_i2c_w_write_regs(sd,&as0260_init01_regs[0], ARRAY_SIZE(as0260_init01_regs));
 	changestate(sd,SS_ENTER_CONFIG_CHANGE,HC_SET_STATE);
 
@@ -1982,8 +1993,8 @@ static int as0260_probe(struct i2c_client *client,
 	strcpy(sd->name, AS0260_DRIVER_NAME);
 	/* set default data from sensor specific value */
 
-	state->fmt.width = WILLOW_PREVIEW_MAX_W;
-	state->fmt.height =WILLOW_PREVIEW_MAX_H;
+	state->fmt.width = MEHMET_PREVIEW_MAX_W;
+	state->fmt.height =MEHMET_PREVIEW_MAX_H;
 	//state->runmode = MT9M113_RUNMODE_NOTREADY;
 
 	printk("AS0260___probe state->fmt.width =%d state->fmt.height=%d \n",state->fmt.width ,state->fmt.height);
