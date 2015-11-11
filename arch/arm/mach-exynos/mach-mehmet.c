@@ -2318,7 +2318,7 @@ static struct i2c_board_info i2c_devs4_DVT[] __initdata = {
 static struct i2c_board_info i2c_devs4_MVT[] __initdata = {
 #ifdef CONFIG_INPUT_ALPS
 	{
-		I2C_BOARD_INFO("accsns_i2c", 0x38),
+		I2C_BOARD_INFO("accsns_i2c", 0x18),
 	}
 #endif
 };
@@ -2972,6 +2972,18 @@ static void __init mehmet_usbswitch_init(void)
 	struct s5p_usbswitch_platdata *pdata = &mehmet_usbswitch_pdata;
 	int err;
 
+#ifdef CONFIG_MACH_MEHMET
+	pdata->gpio_host_detect = EXYNOS4_GPX3(6); /* low active */
+	err = gpio_request_one(pdata->gpio_host_detect, GPIOF_IN, "HOST_DETECT");
+	if (err) {
+		printk(KERN_ERR "failed to request gpio_host_detect\n");
+		return;
+	}
+
+	s3c_gpio_cfgpin(pdata->gpio_host_detect, S3C_GPIO_SFN(0xF));
+	s3c_gpio_setpull(pdata->gpio_host_detect, S3C_GPIO_PULL_NONE);
+	gpio_free(pdata->gpio_host_detect);
+#else
 	pdata->gpio_host_detect = EXYNOS4_GPX1(7); /* low active */
 	err = gpio_request_one(pdata->gpio_host_detect, GPIOF_IN, "HOST_DETECT");
 	if (err) {
@@ -2993,7 +3005,19 @@ static void __init mehmet_usbswitch_init(void)
 	s3c_gpio_cfgpin(pdata->gpio_device_detect, S3C_GPIO_SFN(0xF));
 	s3c_gpio_setpull(pdata->gpio_device_detect, S3C_GPIO_PULL_NONE);
 	gpio_free(pdata->gpio_device_detect);
+#endif
 
+#ifdef CONFIG_MACH_MEHMET
+	pdata->gpio_host_vbus = EXYNOS4_GPX0(6);
+	err = gpio_request_one(pdata->gpio_host_vbus, GPIOF_OUT_INIT_LOW, "HOST_VBUS_CONTROL");
+	if (err) {
+		printk(KERN_ERR "failed to request gpio_host_vbus\n");
+		return;
+	}
+
+	s3c_gpio_setpull(pdata->gpio_host_vbus, S3C_GPIO_PULL_NONE);
+	gpio_free(pdata->gpio_host_vbus);
+#else
 	if (1) /* Mehmet DVT has not gpio_host_vbus */
 		pdata->gpio_host_vbus = 0;
 	else {
@@ -3007,6 +3031,7 @@ static void __init mehmet_usbswitch_init(void)
 		s3c_gpio_setpull(pdata->gpio_host_vbus, S3C_GPIO_PULL_NONE);
 		gpio_free(pdata->gpio_host_vbus);
 	}
+#endif
 
 	s5p_usbswitch_set_platdata(pdata);
 }

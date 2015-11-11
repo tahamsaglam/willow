@@ -155,7 +155,7 @@ static int ohci_hcd_s5p_drv_runtime_suspend(struct device *dev)
 	clear_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
 	spin_unlock_irqrestore(&ohci->lock, flags);
 
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 		ohci_writel (ohci, RH_HS_LPS, &ohci->regs->roothub.status);
 #endif
@@ -182,7 +182,7 @@ static int ohci_hcd_s5p_drv_runtime_resume(struct device *dev)
 	/* Mark hardware accessible again as we are out of D3 state by now */
 	set_bit(HCD_FLAG_HW_ACCESSIBLE, &hcd->flags);
 
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 		ohci_writel (ohci, RH_HS_LPSC, &ohci->regs->roothub.status);
 #endif
@@ -385,7 +385,7 @@ static int __devinit ohci_hcd_s5p_drv_probe(struct platform_device *pdev)
 
 	ohci = hcd_to_ohci(hcd);
 	ohci_hcd_init(ohci);
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 		ohci->flags |= OHCI_QUIRK_SUPERIO;
 #endif
@@ -403,7 +403,7 @@ static int __devinit ohci_hcd_s5p_drv_probe(struct platform_device *pdev)
 	create_ohci_sys_file(ohci);
 	s5p_ohci->power_on = 1;
 
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 	{
 		ohci_writel(ohci, OHCI_INTR_MIE, &ohci->regs->intrdisable);

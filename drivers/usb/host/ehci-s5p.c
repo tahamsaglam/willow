@@ -206,7 +206,7 @@ static int s5p_ehci_runtime_suspend(struct device *dev)
 	if (pdata && pdata->phy_suspend)
 		pdata->phy_suspend(pdev, S5P_USB_PHY_HOST);
 
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 	{
 		ehci_hub_control(hcd,
@@ -258,7 +258,7 @@ static int s5p_ehci_runtime_resume(struct device *dev)
 		ehci_port_power(ehci, 1);
 
 		hcd->state = HC_STATE_SUSPENDED;
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	} else {
 		if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 		{
@@ -495,7 +495,7 @@ static int __devinit s5p_ehci_probe(struct platform_device *pdev)
 	create_ehci_sys_file(ehci);
 	s5p_ehci->power_on = 1;
 
-#ifdef CONFIG_USB_EXYNOS_SWITCH
+#if 0//def CONFIG_USB_EXYNOS_SWITCH
 	if (1) //samsung_board_rev_is_0_0()) /* the same board configuration that Mehmet DVT has */
 		ehci_hub_control(ehci_to_hcd(ehci),
 				ClearPortFeature,

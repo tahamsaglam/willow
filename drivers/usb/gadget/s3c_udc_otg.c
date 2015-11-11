@@ -395,7 +395,7 @@ int usb_gadget_probe_driver(struct usb_gadget_driver *driver,
 	}
 	printk(KERN_INFO "Registered gadget driver '%s'\n",
 			driver->driver.name);
-#ifndef CONFIG_USB_EXYNOS_SWITCH
+#if 1//ndef CONFIG_USB_EXYNOS_SWITCH
 	udc_enable(dev);
 #endif
 #ifdef CONFIG_USB_G_ANDROID
@@ -429,7 +429,7 @@ int usb_gadget_unregister_driver(struct usb_gadget_driver *driver)
 	printk(KERN_INFO "Unregistered gadget driver '%s'\n",
 			driver->driver.name);
 
-#ifndef CONFIG_USB_EXYNOS_SWITCH
+#if 1//ndef CONFIG_USB_EXYNOS_SWITCH
 	udc_disable(dev);
 #endif
 	return 0;

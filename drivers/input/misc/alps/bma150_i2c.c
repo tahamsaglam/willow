@@ -32,9 +32,18 @@
 #define ACC_YOUT           0x04
 #define ACC_ZOUT           0x06
 #define ACC_TEMP           0x08
+#if 0
 #define ACC_REG0B          0x0B
 #define ACC_REG0A          0x0A
 #define ACC_REG14          0x14
+#else
+#define ACC_REG0F          0x0F // range
+#define ACC_REG10          0x10 // bandwidth
+#define ACC_REG11          0x11 // suspend
+#define ACC_REG14          0x14 // soft reset
+#define ACC_REG16          0x16 // interrupt setting
+#define ACC_REG17          0x17 // interrupt setting
+#endif
 
 #define ACC_DRIVER_NAME    "accsns_i2c"
 #define I2C_ACC_ADDR       (0x38)        /* 011 1000    */
@@ -149,14 +158,25 @@ void accsns_activate(int flgatm, int flg)
 
     if (flg != 0) flg = 1;
 
-    buf[0] = ACC_REG14    ; buf[1] = 0;
+#if 0
+    buf[0] = ACC_REG14    ; buf[1] = 0; // range:+/-2g, bandwidth:25Hz
     accsns_i2c_writem(buf, 2);
-    buf[0] = ACC_REG0B    ; buf[1] = 0;
+    buf[0] = ACC_REG0B    ; buf[1] = 0; // interrupt disable
     accsns_i2c_writem(buf, 2);
     buf[0] = ACC_REG0A;
-    if (flg == 0) buf[1] = 0x01;
-    else          buf[1] = 0x00;
+    if (flg == 0) buf[1] = 0x01; // sleep 1
+    else          buf[1] = 0x00; // sleep 0: wakeup
     accsns_i2c_writem(buf, 2);
+#else
+    buf[0] = ACC_REG10    ; buf[1] = 0x0A; // bandwidth:31.25Hz
+    accsns_i2c_writem(buf, 2);
+    buf[0] = ACC_REG0F    ; buf[1] = 0x03; // range:+/-2g
+    accsns_i2c_writem(buf, 2);
+    buf[0] = ACC_REG11;
+    if (flg == 0) buf[1] = 0x80; // suspend set
+    else          buf[1] = 0x00; // suspend reset
+    accsns_i2c_writem(buf, 2);
+#endif
     mdelay(2);
     if (flgatm) atomic_set(&flgEna, flg);
 }
@@ -170,8 +190,14 @@ static void accsns_register_init(void)
     printk("[ACC] register_init\n");
 #endif
 
+    /* soft reset */
+#if 0
     buf[0] = ACC_REG0A;
-    buf[1] = 0x02;
+    buf[1] = 0x02; // soft reset
+#else
+    buf[0] = ACC_REG14;
+    buf[1] = 0xB6; // soft reset
+#endif
     accsns_i2c_writem(buf, 2);
     mdelay(4);
 
