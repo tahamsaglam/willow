@@ -593,7 +593,7 @@ static void __init set_volt_table(void)
 
 #ifdef CONFIG_EXYNOS4X12_1500MHZ_SUPPORT
 	for_1500 = true;
-	max_support_idx = L1;
+	max_support_idx = L0;
 #elif defined(CONFIG_EXYNOS4X12_1200MHZ_SUPPORT)
 	for_1200 = true;
 	max_support_idx = L4;
